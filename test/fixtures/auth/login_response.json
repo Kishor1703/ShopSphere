@@ -1,0 +1,11 @@
+{
+  "id": 42,
+  "username": "sample_user",
+  "email": "sample@example.com",
+  "firstName": "Sample",
+  "lastName": "User",
+  "gender": "female",
+  "image": "https://example.com/avatar.png",
+  "accessToken": "fixture-access-token",
+  "refreshToken": "fixture-refresh-token"
+}

@@ -1,0 +1,6 @@
+{
+  "id": 42,
+  "username": "sample_user",
+  "accessToken": "fixture-access-token",
+  "refreshToken": "fixture-refresh-token"
+}
