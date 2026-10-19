@@ -3,6 +3,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 
 import '../../../../core/theme/app_theme.dart';
+import '../../../../core/theme/theme_toggle.dart';
 import '../../../../core/utils/responsive.dart';
 import '../../../../core/widgets/state_views.dart';
 import '../../../cart/presentation/widgets/cart_badge_button.dart';
@@ -90,7 +91,7 @@ class _CatalogueState extends ConsumerState<_Catalogue> {
   void _fillViewportIfNeeded() {
     WidgetsBinding.instance.addPostFrameCallback((_) {
       if (!mounted || !_scrollController.hasClients) return;
-      if (_scrollController.position.maxScrollExtent <= 0) {
+      if (_scrollController.position.extentAfter <= 400) {
         ref.read(productListProvider.notifier).loadMore();
       }
     });
@@ -116,27 +117,61 @@ class _CatalogueState extends ConsumerState<_Catalogue> {
       }
     });
 
+    ref.listen(
+        productListProvider.select((s) => (s.query, s.categorySlug, s.sort)),
+        (previous, next) {
+      if (previous == next) return;
+      WidgetsBinding.instance.addPostFrameCallback((_) {
+        if (mounted && _scrollController.hasClients) {
+          _scrollController.jumpTo(0);
+        }
+      });
+    });
+
     return Scaffold(
       body: SafeArea(
-        child: Column(
-          children: [
-            _Header(
-              controller: _searchController,
-              sort: state.sort,
-              onChanged: notifier.onQueryChanged,
-              onClear: () {
-                _searchController.clear();
-                notifier.search('');
-              },
-              onSortSelected: notifier.setSort,
-            ),
-            _CategoryChips(
-              selected: state.categorySlug,
-              onSelected: notifier.selectCategory,
-            ),
-            const SizedBox(height: AppSpacing.sm),
-            Expanded(child: _body(state, notifier)),
-          ],
+        child: RefreshIndicator(
+          onRefresh: notifier.refresh,
+          child: CustomScrollView(
+            controller: _scrollController,
+            physics: const AlwaysScrollableScrollPhysics(),
+            keyboardDismissBehavior: ScrollViewKeyboardDismissBehavior.onDrag,
+            slivers: [
+              SliverToBoxAdapter(
+                child: _Header(
+                  controller: _searchController,
+                  sort: state.sort,
+                  onChanged: notifier.onQueryChanged,
+                  onClear: () {
+                    _searchController.clear();
+                    notifier.search('');
+                  },
+                  onSortSelected: notifier.setSort,
+                ),
+              ),
+              SliverToBoxAdapter(
+                child: _CategoryChips(
+                  selected: state.categorySlug,
+                  onSelected: notifier.selectCategory,
+                ),
+              ),
+              const SliverToBoxAdapter(child: SizedBox(height: AppSpacing.sm)),
+              if (state.failure != null &&
+                  state.products.isNotEmpty &&
+                  !state.loadMoreFailed)
+                SliverToBoxAdapter(
+                  child: MaterialBanner(
+                    content: Text(state.failure!.message),
+                    actions: [
+                      TextButton(
+                          onPressed: notifier.refresh,
+                          child: const Text('Retry refresh'))
+                    ],
+                  ),
+                ),
+              _body(state, notifier),
+            ],
+          ),
         ),
       ),
     );
@@ -149,46 +184,49 @@ class _CatalogueState extends ConsumerState<_Catalogue> {
         return _grid(
           itemCount: 8,
           itemBuilder: (context, index) => const ProductCardSkeleton(),
-          scrollable: false,
         );
       case ListStatus.failure:
-        return ErrorView(
-          message: state.failure?.message ?? 'We could not load products.',
-          onRetry: notifier.refresh,
+        return SliverFillRemaining(
+          hasScrollBody: false,
+          child: ErrorView(
+            message: state.failure?.message ?? 'We could not load products.',
+            onRetry: notifier.refresh,
+          ),
         );
       case ListStatus.empty:
-        return EmptyView(
-          icon: Icons.search_off_rounded,
-          title: 'No products found',
-          message: state.hasActiveFilters
-              ? 'Try a different search or category.'
-              : 'There is nothing to show right now.',
-          actionLabel: state.hasActiveFilters ? 'Clear filters' : 'Refresh',
-          onAction: state.hasActiveFilters
-              ? () => notifier.selectCategory(null)
-              : notifier.refresh,
+        return SliverFillRemaining(
+          hasScrollBody: false,
+          child: EmptyView(
+            icon: Icons.search_off_rounded,
+            title: 'No products found',
+            message: state.hasActiveFilters
+                ? 'Try a different search or category.'
+                : 'There is nothing to show right now.',
+            actionLabel: state.hasActiveFilters ? 'Clear filters' : 'Refresh',
+            onAction: state.hasActiveFilters
+                ? () => notifier.selectCategory(null)
+                : notifier.refresh,
+          ),
         );
       case ListStatus.success:
         _fillViewportIfNeeded();
-        final selectedId = widget.expanded
-            ? ref.watch(selectedProductIdProvider)
-            : null;
-        return RefreshIndicator(
-          onRefresh: notifier.refresh,
-          child: _grid(
-            itemCount: state.products.length,
-            itemBuilder: (context, index) {
-              final product = state.products[index];
-              return ProductCard(
-                product: product,
-                selected: product.id == selectedId,
-                onTap: () => _openProduct(product),
-              );
-            },
-            footer: _Footer(state: state, onRetry: () {
-              notifier.loadMore(retry: true);
-            }),
-          ),
+        final selectedId =
+            widget.expanded ? ref.watch(selectedProductIdProvider) : null;
+        return _grid(
+          itemCount: state.products.length,
+          itemBuilder: (context, index) {
+            final product = state.products[index];
+            return ProductCard(
+              product: product,
+              selected: product.id == selectedId,
+              onTap: () => _openProduct(product),
+            );
+          },
+          footer: _Footer(
+              state: state,
+              onRetry: () {
+                notifier.loadMore(retry: true);
+              }),
         );
     }
   }
@@ -197,25 +235,21 @@ class _CatalogueState extends ConsumerState<_Catalogue> {
     required int itemCount,
     required IndexedWidgetBuilder itemBuilder,
     Widget? footer,
-    bool scrollable = true,
   }) {
-    return LayoutBuilder(
+    return SliverLayoutBuilder(
       builder: (context, constraints) {
         const padding = AppSpacing.md;
         const spacing = AppSpacing.md;
-        final width = constraints.maxWidth;
+        final width = constraints.crossAxisExtent;
         final rawColumns = (width / 190).floor();
         final columns = rawColumns < 2 ? 2 : (rawColumns > 4 ? 4 : rawColumns);
-        final cellWidth = (width - padding * 2 - spacing * (columns - 1)) / columns;
+        final cellWidth =
+            (width - padding * 2 - spacing * (columns - 1)) / columns;
         final textScale = MediaQuery.textScalerOf(context).scale(1);
         // Square image plus room for two title lines, price and rating.
         final cellHeight = cellWidth + 118 * textScale;
 
-        return CustomScrollView(
-          controller: scrollable ? _scrollController : null,
-          physics: scrollable
-              ? const AlwaysScrollableScrollPhysics()
-              : const NeverScrollableScrollPhysics(),
+        return SliverMainAxisGroup(
           slivers: [
             SliverPadding(
               padding: const EdgeInsets.fromLTRB(padding, 0, padding, padding),
@@ -290,10 +324,40 @@ class _Header extends StatelessWidget {
                       ?.copyWith(fontWeight: FontWeight.w700),
                 ),
               ),
+              const ThemeToggle(),
               const CartBadgeButton(),
             ],
           ),
           const SizedBox(height: AppSpacing.sm),
+          Container(
+            width: double.infinity,
+            margin: const EdgeInsets.only(
+                right: AppSpacing.sm, bottom: AppSpacing.md),
+            padding: const EdgeInsets.all(20),
+            decoration: BoxDecoration(
+              borderRadius: BorderRadius.circular(24),
+              gradient: LinearGradient(colors: [
+                theme.colorScheme.primaryContainer,
+                theme.colorScheme.secondaryContainer,
+              ]),
+            ),
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Text('A little discovery, every day.',
+                    style: theme.textTheme.titleLarge?.copyWith(
+                      color: theme.colorScheme.onPrimaryContainer,
+                      fontWeight: FontWeight.w800,
+                      letterSpacing: -0.5,
+                    )),
+                const SizedBox(height: 6),
+                Text('Find your next everyday favourite.',
+                    style: theme.textTheme.bodyMedium?.copyWith(
+                      color: theme.colorScheme.onPrimaryContainer,
+                    )),
+              ],
+            ),
+          ),
           Padding(
             padding: const EdgeInsets.only(right: AppSpacing.sm),
             child: Row(

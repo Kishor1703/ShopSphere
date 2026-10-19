@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import '../../../../core/theme/app_theme.dart';
+import '../../../../core/theme/theme_toggle.dart';
 import '../providers/auth_providers.dart';
 
 class LoginPage extends ConsumerStatefulWidget {
@@ -27,7 +28,9 @@ class _LoginPageState extends ConsumerState<LoginPage> {
   void _submit() {
     if (!(_formKey.currentState?.validate() ?? false)) return;
     FocusScope.of(context).unfocus();
-    ref.read(authProvider.notifier).login(_username.text.trim(), _password.text);
+    ref
+        .read(authProvider.notifier)
+        .login(_username.text.trim(), _password.text);
   }
 
   String? _validateUsername(String? value) {
@@ -50,6 +53,7 @@ class _LoginPageState extends ConsumerState<LoginPage> {
     final theme = Theme.of(context);
 
     return Scaffold(
+      appBar: AppBar(actions: const [ThemeToggle(), SizedBox(width: 16)]),
       body: SafeArea(
         child: Center(
           child: SingleChildScrollView(
@@ -140,7 +144,8 @@ class _LoginPageState extends ConsumerState<LoginPage> {
                           ? const SizedBox(
                               width: 22,
                               height: 22,
-                              child: CircularProgressIndicator(strokeWidth: 2.5),
+                              child:
+                                  CircularProgressIndicator(strokeWidth: 2.5),
                             )
                           : const Text('Log in'),
                     ),

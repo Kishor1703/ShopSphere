@@ -34,7 +34,8 @@ class _SkeletonBoxState extends State<SkeletonBox>
         width: widget.width,
         height: widget.height,
         decoration: BoxDecoration(
-          color: Color.lerp(base, Colors.white, _controller.value * 0.6),
+          color: Color.lerp(base, Theme.of(context).colorScheme.surface,
+              _controller.value * 0.6),
           borderRadius: BorderRadius.circular(widget.radius),
         ),
       ),

@@ -24,9 +24,17 @@ class StartupTokens extends InMemoryTokenStorage {
 }
 
 void main() {
+  late SharedPreferences prefs;
+  setUp(() async {
+    SharedPreferences.setMockInitialValues({});
+    prefs = await SharedPreferences.getInstance();
+  });
   testWidgets('fresh install leaves splash and shows login', (tester) async {
     await tester.pumpWidget(ProviderScope(
-      overrides: [tokenStorageProvider.overrideWithValue(StartupTokens())],
+      overrides: [
+        sharedPreferencesProvider.overrideWithValue(prefs),
+        tokenStorageProvider.overrideWithValue(StartupTokens()),
+      ],
       child: const ShopSphereApp(),
     ));
     await tester.pumpAndSettle();
@@ -34,10 +42,14 @@ void main() {
     expect(tester.takeException(), isNull);
   });
 
-  testWidgets('storage failure shows retry and recovers to login', (tester) async {
+  testWidgets('storage failure shows retry and recovers to login',
+      (tester) async {
     final tokens = StartupTokens()..fail = true;
     await tester.pumpWidget(ProviderScope(
-      overrides: [tokenStorageProvider.overrideWithValue(tokens)],
+      overrides: [
+        sharedPreferencesProvider.overrideWithValue(prefs),
+        tokenStorageProvider.overrideWithValue(tokens),
+      ],
       child: const ShopSphereApp(),
     ));
     await tester.pumpAndSettle();
@@ -53,6 +65,7 @@ void main() {
       (tester) async {
     await tester.pumpWidget(ProviderScope(
       overrides: [
+        sharedPreferencesProvider.overrideWithValue(prefs),
         tokenStorageProvider.overrideWithValue(StartupTokens()..hang = true),
       ],
       child: const ShopSphereApp(),

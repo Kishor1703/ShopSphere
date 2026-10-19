@@ -139,7 +139,8 @@ class _SummaryPanel extends StatelessWidget {
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
 
-    Widget row(String label, String value, {bool strong = false, Color? color}) {
+    Widget row(String label, String value,
+        {bool strong = false, Color? color}) {
       final style = strong
           ? theme.textTheme.titleLarge
           : theme.textTheme.bodyLarge?.copyWith(color: color);
@@ -159,7 +160,7 @@ class _SummaryPanel extends StatelessWidget {
       width: double.infinity,
       padding: const EdgeInsets.all(AppSpacing.md),
       decoration: BoxDecoration(
-        color: Colors.white,
+        color: theme.colorScheme.surface,
         border: Border(
           top: BorderSide(color: theme.colorScheme.outlineVariant),
         ),
@@ -172,7 +173,9 @@ class _SummaryPanel extends StatelessWidget {
           row(
             'Discount',
             '-${formatPrice(summary.discount)}',
-            color: AppColors.success,
+            color: theme.brightness == Brightness.dark
+                ? const Color(0xFF81DCA9)
+                : AppColors.success,
           ),
           const Divider(),
           row('Total', formatPrice(summary.total), strong: true),

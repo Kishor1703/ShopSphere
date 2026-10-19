@@ -4,6 +4,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import '../../../../core/error/failure.dart';
 import '../../../../core/theme/app_theme.dart';
+import '../../../../core/theme/theme_toggle.dart';
 import '../../../../core/widgets/state_views.dart';
 import '../../../auth/domain/entities/user.dart';
 import '../../../auth/presentation/providers/auth_providers.dart';
@@ -16,7 +17,10 @@ class ProfilePage extends ConsumerWidget {
     final profile = ref.watch(profileProvider);
 
     return Scaffold(
-      appBar: AppBar(title: const Text('Profile')),
+      appBar: AppBar(
+        title: const Text('Your profile'),
+        actions: const [ThemeToggle(), SizedBox(width: 16)],
+      ),
       body: SafeArea(
         child: profile.when(
           loading: () => const Center(child: CircularProgressIndicator()),
@@ -160,7 +164,7 @@ class _InfoRow extends StatelessWidget {
       margin: const EdgeInsets.only(bottom: AppSpacing.sm),
       padding: const EdgeInsets.all(AppSpacing.md),
       decoration: BoxDecoration(
-        color: Colors.white,
+        color: scheme.surface,
         borderRadius: BorderRadius.circular(AppRadius.control),
         border: Border.all(color: scheme.outlineVariant),
       ),

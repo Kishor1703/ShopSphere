@@ -181,7 +181,7 @@ class _ImageCarouselState extends State<_ImageCarousel> {
           child: ClipRRect(
             borderRadius: BorderRadius.circular(AppRadius.card),
             child: ColoredBox(
-              color: Colors.white,
+              color: AppColors.productBackdrop,
               child: images.isEmpty
                   ? const AppNetworkImage(url: null)
                   : PageView.builder(
@@ -220,9 +220,8 @@ class _ImageCarouselState extends State<_ImageCarousel> {
                     width: i == _index ? 20 : 8,
                     height: 8,
                     decoration: BoxDecoration(
-                      color: i == _index
-                          ? scheme.primary
-                          : scheme.outlineVariant,
+                      color:
+                          i == _index ? scheme.primary : scheme.outlineVariant,
                       borderRadius: BorderRadius.circular(4),
                     ),
                   ),
@@ -253,9 +252,8 @@ class _InfoColumn extends ConsumerWidget {
     final theme = Theme.of(context);
     final scheme = theme.colorScheme;
     final maxQuantity = product.stock < 1 ? 1 : product.stock;
-    final safeQuantity = quantity < 1
-        ? 1
-        : (quantity > maxQuantity ? maxQuantity : quantity);
+    final safeQuantity =
+        quantity < 1 ? 1 : (quantity > maxQuantity ? maxQuantity : quantity);
 
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
@@ -291,8 +289,7 @@ class _InfoColumn extends ConsumerWidget {
                 ),
               ),
               Container(
-                padding:
-                    const EdgeInsets.symmetric(horizontal: 8, vertical: 3),
+                padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 3),
                 decoration: BoxDecoration(
                   color: AppColors.amber,
                   borderRadius: BorderRadius.circular(8),
@@ -363,8 +360,18 @@ class _StockLabel extends StatelessWidget {
     final (label, color) = stock < 1
         ? ('Out of stock', scheme.error)
         : stock <= 5
-            ? ('Only $stock left', const Color(0xFFB45309))
-            : ('In stock', AppColors.success);
+            ? (
+                'Only $stock left',
+                Theme.of(context).brightness == Brightness.dark
+                    ? const Color(0xFFFFC078)
+                    : const Color(0xFFB45309)
+              )
+            : (
+                'In stock',
+                Theme.of(context).brightness == Brightness.dark
+                    ? const Color(0xFF81DCA9)
+                    : AppColors.success
+              );
     return Row(
       mainAxisSize: MainAxisSize.min,
       children: [
@@ -397,7 +404,7 @@ class _ReviewTile extends StatelessWidget {
       margin: const EdgeInsets.only(bottom: AppSpacing.sm),
       padding: const EdgeInsets.all(AppSpacing.md),
       decoration: BoxDecoration(
-        color: Colors.white,
+        color: scheme.surface,
         borderRadius: BorderRadius.circular(AppRadius.control),
         border: Border.all(color: scheme.outlineVariant),
       ),

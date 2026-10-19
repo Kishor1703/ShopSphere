@@ -31,7 +31,7 @@ class ProductCard extends StatelessWidget {
         margin: EdgeInsets.zero,
         elevation: 0,
         clipBehavior: Clip.antiAlias,
-        color: Colors.white,
+        color: scheme.surface,
         shape: RoundedRectangleBorder(
           borderRadius: BorderRadius.circular(AppRadius.card),
           side: BorderSide(
@@ -51,9 +51,15 @@ class ProductCard extends StatelessWidget {
                   children: [
                     Hero(
                       tag: 'product-image-${product.id}',
-                      child: AppNetworkImage(
-                        url: product.thumbnail,
-                        fit: BoxFit.contain,
+                      child: ColoredBox(
+                        color: AppColors.productBackdrop,
+                        child: Padding(
+                          padding: const EdgeInsets.all(8),
+                          child: AppNetworkImage(
+                            url: product.thumbnail,
+                            fit: BoxFit.contain,
+                          ),
+                        ),
                       ),
                     ),
                     if (product.hasDiscount)

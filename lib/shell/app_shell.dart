@@ -3,6 +3,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 
 import '../core/utils/responsive.dart';
+import '../core/widgets/scroll_navigation_scaffold.dart';
 import '../features/cart/presentation/providers/cart_providers.dart';
 
 /// Bottom navigation on compact screens, navigation rail on larger ones.
@@ -45,9 +46,10 @@ class AppShell extends ConsumerWidget {
     ];
 
     if (context.screenSize == ScreenSize.compact) {
-      return Scaffold(
+      return ScrollNavigationScaffold(
+        branchIndex: navigationShell.currentIndex,
         body: navigationShell,
-        bottomNavigationBar: NavigationBar(
+        navigationBar: NavigationBar(
           selectedIndex: navigationShell.currentIndex,
           onDestinationSelected: _select,
           destinations: [

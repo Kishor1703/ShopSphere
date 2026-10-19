@@ -28,7 +28,7 @@ class CartItemTile extends StatelessWidget {
     return Container(
       padding: const EdgeInsets.all(AppSpacing.sm),
       decoration: BoxDecoration(
-        color: Colors.white,
+        color: scheme.surface,
         borderRadius: BorderRadius.circular(AppRadius.card),
         border: Border.all(color: scheme.outlineVariant),
       ),

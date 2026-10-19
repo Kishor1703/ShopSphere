@@ -1,3 +1,5 @@
+import 'dart:developer' as developer;
+
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:shared_preferences/shared_preferences.dart';
@@ -20,8 +22,20 @@ class ShopSphereBootstrap extends StatefulWidget {
 class _ShopSphereBootstrapState extends State<ShopSphereBootstrap> {
   late Future<SharedPreferences> _preferences = _loadPreferences();
 
-  Future<SharedPreferences> _loadPreferences() =>
-      SharedPreferences.getInstance().timeout(const Duration(seconds: 15));
+  Future<SharedPreferences> _loadPreferences() async {
+    try {
+      return await SharedPreferences.getInstance()
+          .timeout(const Duration(seconds: 15));
+    } catch (error, stackTrace) {
+      developer.log(
+        'Local storage initialization failed',
+        name: 'ShopSphere.startup',
+        error: error,
+        stackTrace: stackTrace,
+      );
+      rethrow;
+    }
+  }
 
   @override
   Widget build(BuildContext context) {

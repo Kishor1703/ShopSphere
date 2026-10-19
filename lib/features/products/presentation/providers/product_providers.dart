@@ -52,6 +52,7 @@ class ProductListState extends Equatable {
     this.sort = ProductSort.featured,
     this.hasMore = true,
     this.isLoadingMore = false,
+    this.isRefreshing = false,
     this.loadMoreFailed = false,
     this.failure,
   });
@@ -63,11 +64,11 @@ class ProductListState extends Equatable {
   final ProductSort sort;
   final bool hasMore;
   final bool isLoadingMore;
+  final bool isRefreshing;
   final bool loadMoreFailed;
   final Failure? failure;
 
-  bool get hasActiveFilters =>
-      query.isNotEmpty || categorySlug != null;
+  bool get hasActiveFilters => query.isNotEmpty || categorySlug != null;
 
   ProductListState copyWith({
     ListStatus? status,
@@ -78,6 +79,7 @@ class ProductListState extends Equatable {
     ProductSort? sort,
     bool? hasMore,
     bool? isLoadingMore,
+    bool? isRefreshing,
     bool? loadMoreFailed,
     Failure? failure,
     bool clearFailure = false,
@@ -91,6 +93,7 @@ class ProductListState extends Equatable {
         sort: sort ?? this.sort,
         hasMore: hasMore ?? this.hasMore,
         isLoadingMore: isLoadingMore ?? this.isLoadingMore,
+        isRefreshing: isRefreshing ?? this.isRefreshing,
         loadMoreFailed: loadMoreFailed ?? this.loadMoreFailed,
         failure: clearFailure ? null : (failure ?? this.failure),
       );
@@ -104,6 +107,7 @@ class ProductListState extends Equatable {
         sort,
         hasMore,
         isLoadingMore,
+        isRefreshing,
         loadMoreFailed,
         failure,
       ];
@@ -122,10 +126,14 @@ class ProductListNotifier extends Notifier<ProductListState> {
   Timer? _debounce;
   int _requestId = 0;
   int _nextSkip = 0;
+  Future<void>? _refreshing;
 
   @override
   ProductListState build() {
-    ref.onDispose(() => _debounce?.cancel());
+    ref.onDispose(() {
+      _debounce?.cancel();
+      _requestId++;
+    });
     return const ProductListState();
   }
 
@@ -135,24 +143,42 @@ class ProductListNotifier extends Notifier<ProductListState> {
     await _loadFirstPage();
   }
 
-  Future<void> refresh() => _loadFirstPage();
+  Future<void> refresh() {
+    if (_refreshing != null) return _refreshing!;
+    _debounce?.cancel();
+    final operation = _loadFirstPage(preserveProducts: true);
+    _refreshing = operation;
+    return operation.whenComplete(() {
+      if (identical(_refreshing, operation)) _refreshing = null;
+    });
+  }
 
   /// Debounced entry point for the search field.
   void onQueryChanged(String query) {
     _debounce?.cancel();
-    _debounce = Timer(debounceDuration, () => search(query));
+    // Invalidate immediately, before the debounce fires, including load-more.
+    _requestId++;
+    _refreshing = null;
+    _debounce = Timer(debounceDuration, () {
+      state = state.copyWith(
+          query: query.trim(), clearCategory: query.trim().isNotEmpty);
+      unawaited(_loadFirstPage());
+    });
   }
 
   Future<void> search(String query) {
+    final pendingSearch = _debounce?.isActive ?? false;
+    _debounce?.cancel();
     final trimmed = query.trim();
-    if (trimmed == state.query) return Future<void>.value();
+    if (trimmed == state.query && !pendingSearch) return Future<void>.value();
     state = state.copyWith(query: trimmed, clearCategory: trimmed.isNotEmpty);
     return _loadFirstPage();
   }
 
   Future<void> selectCategory(String? slug) {
+    final pendingSearch = _debounce?.isActive ?? false;
     _debounce?.cancel();
-    if (slug == state.categorySlug && state.query.isEmpty) {
+    if (slug == state.categorySlug && state.query.isEmpty && !pendingSearch) {
       return Future<void>.value();
     }
     state = state.copyWith(
@@ -164,7 +190,9 @@ class ProductListNotifier extends Notifier<ProductListState> {
   }
 
   Future<void> setSort(ProductSort sort) {
-    if (sort == state.sort) return Future<void>.value();
+    final pendingSearch = _debounce?.isActive ?? false;
+    _debounce?.cancel();
+    if (sort == state.sort && !pendingSearch) return Future<void>.value();
     state = state.copyWith(sort: sort);
     return _loadFirstPage();
   }
@@ -172,12 +200,15 @@ class ProductListNotifier extends Notifier<ProductListState> {
   Future<void> loadMore({bool retry = false}) async {
     if (state.status != ListStatus.success ||
         state.isLoadingMore ||
+        state.isRefreshing ||
+        (_debounce?.isActive ?? false) ||
         !state.hasMore ||
         (state.loadMoreFailed && !retry)) {
       return;
     }
     final requestId = _requestId;
-    state = state.copyWith(isLoadingMore: true, loadMoreFailed: false);
+    state = state.copyWith(
+        isLoadingMore: true, loadMoreFailed: false, clearFailure: true);
     try {
       final page = await _fetch(skip: _nextSkip);
       if (requestId != _requestId) return;
@@ -186,22 +217,26 @@ class ProductListNotifier extends Notifier<ProductListState> {
       final fresh = page.products.where((p) => seen.add(p.id)).toList();
       state = state.copyWith(
         products: [...state.products, ...fresh],
-        hasMore: page.hasMore,
+        hasMore: page.products.isNotEmpty && _nextSkip < page.total,
         isLoadingMore: false,
       );
-    } on Failure {
+    } on Failure catch (failure) {
       if (requestId != _requestId) return;
-      state = state.copyWith(isLoadingMore: false, loadMoreFailed: true);
+      state = state.copyWith(
+          isLoadingMore: false, loadMoreFailed: true, failure: failure);
     }
   }
 
-  Future<void> _loadFirstPage() async {
+  Future<void> _loadFirstPage({bool preserveProducts = false}) async {
     final requestId = ++_requestId;
-    _nextSkip = 0;
+    _refreshing = null;
+    final retain = preserveProducts && state.products.isNotEmpty;
+    if (!retain) _nextSkip = 0;
     state = state.copyWith(
-      status: ListStatus.loading,
-      products: const [],
-      hasMore: true,
+      status: retain ? ListStatus.success : ListStatus.loading,
+      products: retain ? state.products : const [],
+      hasMore: retain ? state.hasMore : true,
+      isRefreshing: retain,
       isLoadingMore: false,
       loadMoreFailed: false,
       clearFailure: true,
@@ -216,11 +251,16 @@ class ProductListNotifier extends Notifier<ProductListState> {
       state = state.copyWith(
         status: products.isEmpty ? ListStatus.empty : ListStatus.success,
         products: products,
-        hasMore: page.hasMore,
+        isRefreshing: false,
+        hasMore: page.products.isNotEmpty && _nextSkip < page.total,
       );
     } on Failure catch (failure) {
       if (requestId != _requestId) return;
-      state = state.copyWith(status: ListStatus.failure, failure: failure);
+      state = state.copyWith(
+        status: retain ? ListStatus.success : ListStatus.failure,
+        isRefreshing: false,
+        failure: failure,
+      );
     }
   }
 
