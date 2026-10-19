@@ -1,3 +1,4 @@
+import 'package:flutter_localizations/flutter_localizations.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_test/flutter_test.dart';
@@ -90,10 +91,7 @@ void main() {
     await tester.pumpWidget(MaterialApp(
       locale: restored.read(localeProvider),
       supportedLocales: const [Locale('en'), Locale('hi')],
-      localizationsDelegates: const [
-        AppMaterialDelegate(),
-        AppWidgetsDelegate()
-      ],
+      localizationsDelegates: GlobalMaterialLocalizations.delegates,
       home: Builder(
           builder: (context) =>
               Scaffold(body: Text(context.tr('Welcome back')))),

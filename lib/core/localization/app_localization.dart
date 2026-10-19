@@ -1,5 +1,5 @@
 import 'package:flutter/material.dart';
-import 'package:flutter/foundation.dart';
+
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../di/providers.dart';
 
@@ -165,52 +165,4 @@ class LanguageButton extends ConsumerWidget {
           }
         },
       );
-}
-
-class HindiMaterialLocalizations extends DefaultMaterialLocalizations {
-  const HindiMaterialLocalizations();
-  @override
-  String get backButtonTooltip => 'वापस';
-  @override
-  String get closeButtonTooltip => 'बंद करें';
-  @override
-  String get cancelButtonLabel => 'रद्द करें';
-  @override
-  String get okButtonLabel => 'ठीक है';
-  @override
-  String get copyButtonLabel => 'कॉपी करें';
-  @override
-  String get pasteButtonLabel => 'पेस्ट करें';
-  @override
-  String get cutButtonLabel => 'काटें';
-  @override
-  String get selectAllButtonLabel => 'सभी चुनें';
-  @override
-  String get searchFieldLabel => 'खोजें';
-  @override
-  String get moreButtonTooltip => 'और';
-}
-
-class AppMaterialDelegate extends LocalizationsDelegate<MaterialLocalizations> {
-  const AppMaterialDelegate();
-  @override
-  bool isSupported(Locale locale) => ['en', 'hi'].contains(locale.languageCode);
-  @override
-  Future<MaterialLocalizations> load(Locale locale) =>
-      SynchronousFuture(locale.languageCode == 'hi'
-          ? const HindiMaterialLocalizations()
-          : const DefaultMaterialLocalizations());
-  @override
-  bool shouldReload(AppMaterialDelegate old) => false;
-}
-
-class AppWidgetsDelegate extends LocalizationsDelegate<WidgetsLocalizations> {
-  const AppWidgetsDelegate();
-  @override
-  bool isSupported(Locale locale) => ['en', 'hi'].contains(locale.languageCode);
-  @override
-  Future<WidgetsLocalizations> load(Locale locale) =>
-      SynchronousFuture(const DefaultWidgetsLocalizations());
-  @override
-  bool shouldReload(AppWidgetsDelegate old) => false;
 }

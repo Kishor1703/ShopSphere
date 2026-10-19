@@ -1,3 +1,4 @@
+import 'package:flutter_localizations/flutter_localizations.dart';
 import 'package:flutter/material.dart';
 import 'core/localization/app_localization.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
@@ -18,10 +19,7 @@ class ShopSphereApp extends ConsumerWidget {
       darkTheme: buildAppTheme(brightness: Brightness.dark),
       locale: ref.watch(localeProvider),
       supportedLocales: const [Locale('en'), Locale('hi')],
-      localizationsDelegates: const [
-        AppMaterialDelegate(),
-        AppWidgetsDelegate()
-      ],
+      localizationsDelegates: GlobalMaterialLocalizations.delegates,
       themeMode: ref.watch(themeModeProvider),
       routerConfig: ref.watch(routerProvider),
     );
