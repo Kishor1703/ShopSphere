@@ -1,104 +1,87 @@
 import 'package:flutter/material.dart';
 
-import 'app_spacing.dart';
+class AppColors {
+  const AppColors._();
 
-/// Central Material 3 theme: deep teal accents and neutral surfaces.
-abstract final class AppTheme {
-  static final ThemeData light = _buildLight();
+  static const marine = Color(0xFF0B3C5D);
+  static const amber = Color(0xFFF2A900);
+  static const onAmber = Color(0xFF2B1D00);
+  static const surface = Color(0xFFF4F6F9);
+  static const success = Color(0xFF1E7A4C);
+}
 
-  static ThemeData _buildLight() {
-    final colors = ColorScheme.fromSeed(seedColor: const Color(0xFF155E63));
-    final base = ThemeData(useMaterial3: true, colorScheme: colors);
-    final text = base.textTheme.copyWith(
-      headlineMedium: base.textTheme.headlineMedium?.copyWith(
-        fontWeight: FontWeight.w700,
-        letterSpacing: -0.5,
-      ),
-      titleLarge: base.textTheme.titleLarge?.copyWith(
-        fontWeight: FontWeight.w600,
-      ),
-      bodyLarge: base.textTheme.bodyLarge?.copyWith(height: 1.5),
-      bodyMedium: base.textTheme.bodyMedium?.copyWith(height: 1.5),
-      labelLarge: base.textTheme.labelLarge?.copyWith(
-        fontWeight: FontWeight.w600,
-      ),
-    );
-    final shape = RoundedRectangleBorder(
-      borderRadius: BorderRadius.circular(12),
-    );
-    const padding = EdgeInsets.symmetric(
-      horizontal: AppSpacing.lg,
-      vertical: AppSpacing.md,
-    );
-    final border = OutlineInputBorder(
-      borderRadius: BorderRadius.circular(12),
-      borderSide: BorderSide(color: colors.outline),
-    );
-    return base.copyWith(
-      textTheme: text,
-      scaffoldBackgroundColor: colors.surface,
-      appBarTheme: AppBarTheme(
-        backgroundColor: colors.surface,
-        foregroundColor: colors.onSurface,
-        elevation: 0,
-        centerTitle: false,
-        titleTextStyle: text.titleLarge?.copyWith(color: colors.onSurface),
-      ),
-      filledButtonTheme: FilledButtonThemeData(
-        style: FilledButton.styleFrom(
-          minimumSize: const Size(64, 48),
-          padding: padding,
-          shape: shape,
+class AppSpacing {
+  const AppSpacing._();
+
+  static const xs = 4.0;
+  static const sm = 8.0;
+  static const md = 16.0;
+  static const lg = 24.0;
+  static const xl = 32.0;
+}
+
+class AppRadius {
+  const AppRadius._();
+
+  static const card = 16.0;
+  static const control = 12.0;
+}
+
+ThemeData buildAppTheme() {
+  final scheme = ColorScheme.fromSeed(
+    seedColor: AppColors.marine,
+    brightness: Brightness.light,
+  ).copyWith(secondary: AppColors.amber, onSecondary: AppColors.onAmber);
+
+  return ThemeData(
+    useMaterial3: true,
+    colorScheme: scheme,
+    scaffoldBackgroundColor: AppColors.surface,
+    filledButtonTheme: FilledButtonThemeData(
+      style: FilledButton.styleFrom(
+        minimumSize: const Size(48, 52),
+        shape: RoundedRectangleBorder(
+          borderRadius: BorderRadius.circular(AppRadius.control),
         ),
       ),
-      elevatedButtonTheme: ElevatedButtonThemeData(
-        style: ElevatedButton.styleFrom(
-          minimumSize: const Size(64, 48),
-          padding: padding,
-          shape: shape,
-          elevation: 1,
+    ),
+    outlinedButtonTheme: OutlinedButtonThemeData(
+      style: OutlinedButton.styleFrom(
+        minimumSize: const Size(48, 48),
+        shape: RoundedRectangleBorder(
+          borderRadius: BorderRadius.circular(AppRadius.control),
         ),
       ),
-      outlinedButtonTheme: OutlinedButtonThemeData(
-        style: OutlinedButton.styleFrom(
-          minimumSize: const Size(64, 48),
-          padding: padding,
-          shape: shape,
-        ),
-      ),
-      textButtonTheme: TextButtonThemeData(
-        style: TextButton.styleFrom(
-          minimumSize: const Size(64, 48),
-          padding: padding,
-          shape: shape,
-        ),
-      ),
-      inputDecorationTheme: InputDecorationTheme(
-        filled: true,
-        fillColor: colors.surfaceContainerLowest,
-        contentPadding: const EdgeInsets.all(AppSpacing.md),
-        border: border,
-        enabledBorder: border,
-        focusedBorder: border.copyWith(
-          borderSide: BorderSide(color: colors.primary, width: 2),
-        ),
-        errorBorder: border.copyWith(
-          borderSide: BorderSide(color: colors.error),
-        ),
-        focusedErrorBorder: border.copyWith(
-          borderSide: BorderSide(color: colors.error, width: 2),
-        ),
-      ),
-      cardTheme: CardThemeData(
-        color: colors.surfaceContainerLowest,
-        elevation: 0,
-        margin: EdgeInsets.zero,
-        shape: shape.copyWith(side: BorderSide(color: colors.outlineVariant)),
-      ),
-      dividerTheme: DividerThemeData(
-        color: colors.outlineVariant,
-        space: AppSpacing.lg,
-      ),
-    );
-  }
+    ),
+    snackBarTheme: const SnackBarThemeData(behavior: SnackBarBehavior.floating),
+  );
+}
+
+/// Shared text-field decoration so every input looks the same.
+InputDecoration appInputDecoration(
+  BuildContext context, {
+  required String label,
+  IconData? icon,
+  Widget? suffix,
+  String? hint,
+}) {
+  final scheme = Theme.of(context).colorScheme;
+  OutlineInputBorder border(Color color, [double width = 1]) =>
+      OutlineInputBorder(
+        borderRadius: BorderRadius.circular(AppRadius.control),
+        borderSide: BorderSide(color: color, width: width),
+      );
+  return InputDecoration(
+    labelText: label,
+    hintText: hint,
+    prefixIcon: icon == null ? null : Icon(icon),
+    suffixIcon: suffix,
+    filled: true,
+    fillColor: Colors.white,
+    border: border(scheme.outlineVariant),
+    enabledBorder: border(scheme.outlineVariant),
+    focusedBorder: border(scheme.primary, 2),
+    errorBorder: border(scheme.error),
+    focusedErrorBorder: border(scheme.error, 2),
+  );
 }

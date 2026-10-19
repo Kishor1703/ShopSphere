@@ -1,0 +1,25 @@
+{
+  "id": 144,
+  "title": "Apple iPhone 5s",
+  "description": "A classic smartphone with a fingerprint sensor.",
+  "category": "smartphones",
+  "price": 199.99,
+  "discountPercentage": 10.5,
+  "rating": 4.5,
+  "stock": 12,
+  "brand": "Apple",
+  "thumbnail": "https://cdn.dummyjson.com/products/images/smartphones/thumb.png",
+  "images": [
+    "https://cdn.dummyjson.com/products/images/smartphones/1.png",
+    "https://cdn.dummyjson.com/products/images/smartphones/2.png"
+  ],
+  "reviews": [
+    {
+      "rating": 5,
+      "comment": "Great phone!",
+      "date": "2025-04-30T09:41:02.053Z",
+      "reviewerName": "Eleanor Collins",
+      "reviewerEmail": "eleanor@example.com"
+    }
+  ]
+}

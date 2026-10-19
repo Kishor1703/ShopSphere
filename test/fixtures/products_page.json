@@ -1,0 +1,9 @@
+{
+  "products": [
+    { "id": 1, "title": "Essence Mascara", "price": 9.99, "discountPercentage": 7.17, "rating": 4.94, "stock": 5, "brand": "Essence", "thumbnail": "https://example.com/1.png", "images": ["https://example.com/1.png"] },
+    { "id": 2, "title": "Eyeshadow Palette", "price": 19.99, "discountPercentage": 5.5, "rating": 3.28, "stock": 44, "thumbnail": "https://example.com/2.png", "images": [] }
+  ],
+  "total": 194,
+  "skip": 0,
+  "limit": 2
+}
