@@ -178,13 +178,13 @@ class _SummaryPanel extends StatelessWidget {
                 ? const Color(0xFF81DCA9)
                 : AppColors.success,
           ),
-          Divider(),
+          const Divider(),
           row('Total', formatPrice(summary.total), strong: true),
           const SizedBox(height: AppSpacing.md),
           FilledButton(
             onPressed: submitting ? null : onPlaceOrder,
             child: submitting
-                ? SizedBox(
+                ? const SizedBox(
                     width: 22,
                     height: 22,
                     child: CircularProgressIndicator(strokeWidth: 2.5),

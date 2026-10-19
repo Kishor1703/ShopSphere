@@ -112,7 +112,9 @@ class AuthRepositoryImpl implements AuthRepository {
       final cached = _cachedUser();
       if (_offline(failure) &&
           cached != null &&
-          await _tokens.readAccessToken() != null) return cached;
+          await _tokens.readAccessToken() != null) {
+        return cached;
+      }
       throw failure;
     }
   }

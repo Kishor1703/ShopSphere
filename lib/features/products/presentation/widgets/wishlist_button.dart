@@ -18,10 +18,11 @@ class WishlistButton extends ConsumerWidget {
         try {
           await ref.read(wishlistProvider.notifier).toggle(product);
         } catch (_) {
-          if (context.mounted)
+          if (context.mounted) {
             ScaffoldMessenger.of(context).showSnackBar(SnackBar(
                 content: Text(context
                     .tr('Could not save favourites. Please try again.'))));
+          }
         }
       },
     );

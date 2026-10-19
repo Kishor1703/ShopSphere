@@ -23,7 +23,7 @@ class QuantitySelector extends StatelessWidget {
       children: [
         IconButton.outlined(
           tooltip: context.tr('Decrease quantity'),
-          constraints: BoxConstraints(minWidth: 48, minHeight: 48),
+          constraints: const BoxConstraints(minWidth: 48, minHeight: 48),
           onPressed: value > min ? () => onChanged(value - 1) : null,
           icon: const Icon(Icons.remove),
         ),
@@ -40,7 +40,7 @@ class QuantitySelector extends StatelessWidget {
         ),
         IconButton.outlined(
           tooltip: context.tr('Increase quantity'),
-          constraints: BoxConstraints(minWidth: 48, minHeight: 48),
+          constraints: const BoxConstraints(minWidth: 48, minHeight: 48),
           onPressed: value < max ? () => onChanged(value + 1) : null,
           icon: const Icon(Icons.add),
         ),

@@ -25,7 +25,7 @@ class ProfilePage extends ConsumerWidget {
       ),
       body: SafeArea(
         child: profile.when(
-          loading: () => Center(child: CircularProgressIndicator()),
+          loading: () => const Center(child: CircularProgressIndicator()),
           error: (error, _) => ErrorView(
             message: error is Failure
                 ? error.message

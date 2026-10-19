@@ -27,14 +27,14 @@ class OrderSuccessPage extends ConsumerWidget {
                 children: [
                   TweenAnimationBuilder<double>(
                     tween: Tween(begin: 0.6, end: 1),
-                    duration: Duration(milliseconds: 450),
+                    duration: const Duration(milliseconds: 450),
                     curve: Curves.easeOutBack,
                     builder: (context, scale, child) =>
                         Transform.scale(scale: scale, child: child),
                     child: Container(
                       width: 96,
                       height: 96,
-                      decoration: BoxDecoration(
+                      decoration: const BoxDecoration(
                         color: AppColors.success,
                         shape: BoxShape.circle,
                       ),

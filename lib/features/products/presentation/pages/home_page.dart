@@ -27,7 +27,7 @@ class HomePage extends ConsumerWidget {
     return Row(
       children: [
         Expanded(flex: 11, child: catalogue),
-        VerticalDivider(width: 1),
+        const VerticalDivider(width: 1),
         Expanded(
           flex: 9,
           child: selected == null
@@ -136,7 +136,7 @@ class _CatalogueState extends ConsumerState<_Catalogue> {
           onRefresh: notifier.refresh,
           child: CustomScrollView(
             controller: _scrollController,
-            physics: AlwaysScrollableScrollPhysics(),
+            physics: const AlwaysScrollableScrollPhysics(),
             keyboardDismissBehavior: ScrollViewKeyboardDismissBehavior.onDrag,
             slivers: [
               SliverToBoxAdapter(
@@ -157,7 +157,7 @@ class _CatalogueState extends ConsumerState<_Catalogue> {
                   onSelected: notifier.selectCategory,
                 ),
               ),
-              SliverToBoxAdapter(child: const SizedBox(height: AppSpacing.sm)),
+              const SliverToBoxAdapter(child: SizedBox(height: AppSpacing.sm)),
               if (state.failure != null &&
                   state.products.isNotEmpty &&
                   !state.loadMoreFailed)
@@ -197,7 +197,7 @@ class _CatalogueState extends ConsumerState<_Catalogue> {
       case ListStatus.loading:
         return _grid(
           itemCount: 8,
-          itemBuilder: (context, index) => ProductCardSkeleton(),
+          itemBuilder: (context, index) => const ProductCardSkeleton(),
         );
       case ListStatus.failure:
         return SliverFillRemaining(
@@ -266,7 +266,7 @@ class _CatalogueState extends ConsumerState<_Catalogue> {
         return SliverMainAxisGroup(
           slivers: [
             SliverPadding(
-              padding: EdgeInsets.fromLTRB(padding, 0, padding, padding),
+              padding: const EdgeInsets.fromLTRB(padding, 0, padding, padding),
               sliver: SliverGrid(
                 gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
                   crossAxisCount: columns,
@@ -342,8 +342,8 @@ class _Header extends StatelessWidget {
                   tooltip: context.tr('Wishlist'),
                   onPressed: () => context.push('/wishlist'),
                   icon: const Icon(Icons.favorite_border)),
-              ThemeToggle(),
-              CartBadgeButton(),
+              const ThemeToggle(),
+              const CartBadgeButton(),
             ],
           ),
           const SizedBox(height: AppSpacing.sm),
@@ -476,8 +476,8 @@ class _Footer extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     if (state.isLoadingMore) {
-      return Padding(
-        padding: const EdgeInsets.all(AppSpacing.md),
+      return const Padding(
+        padding: EdgeInsets.all(AppSpacing.md),
         child: Center(
           child: SizedBox(
             width: 28,

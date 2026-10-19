@@ -83,7 +83,7 @@ class AppShell extends ConsumerWidget {
               ],
             ),
           ),
-          VerticalDivider(width: 1),
+          const VerticalDivider(width: 1),
           Expanded(child: navigationShell),
         ],
       ),

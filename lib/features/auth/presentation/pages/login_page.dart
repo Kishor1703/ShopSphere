@@ -37,16 +37,18 @@ class _LoginPageState extends ConsumerState<LoginPage> {
   String? _validateUsername(String? value) {
     final text = value?.trim() ?? '';
     if (text.isEmpty) return context.tr('Enter your username');
-    if (text.length < 3)
+    if (text.length < 3) {
       return context.tr('Username must be at least 3 characters');
+    }
     return null;
   }
 
   String? _validatePassword(String? value) {
     final text = value ?? '';
     if (text.isEmpty) return context.tr('Enter your password');
-    if (text.length < 6)
+    if (text.length < 6) {
       return context.tr('Password must be at least 6 characters');
+    }
     return null;
   }
 
@@ -111,7 +113,7 @@ class _LoginPageState extends ConsumerState<LoginPage> {
                       controller: _username,
                       enabled: !auth.isSubmitting,
                       textInputAction: TextInputAction.next,
-                      autofillHints: [AutofillHints.username],
+                      autofillHints: const [AutofillHints.username],
                       validator: _validateUsername,
                       decoration: appInputDecoration(
                         context,
@@ -125,7 +127,7 @@ class _LoginPageState extends ConsumerState<LoginPage> {
                       enabled: !auth.isSubmitting,
                       obscureText: _obscure,
                       textInputAction: TextInputAction.done,
-                      autofillHints: [AutofillHints.password],
+                      autofillHints: const [AutofillHints.password],
                       validator: _validatePassword,
                       onFieldSubmitted: (_) => _submit(),
                       decoration: appInputDecoration(
@@ -148,7 +150,7 @@ class _LoginPageState extends ConsumerState<LoginPage> {
                     FilledButton(
                       onPressed: auth.isSubmitting ? null : _submit,
                       child: auth.isSubmitting
-                          ? SizedBox(
+                          ? const SizedBox(
                               width: 22,
                               height: 22,
                               child:

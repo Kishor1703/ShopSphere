@@ -54,7 +54,7 @@ class SplashPage extends ConsumerWidget {
                   ),
             ),
             const SizedBox(height: AppSpacing.lg),
-            SizedBox(
+            const SizedBox(
               width: 28,
               height: 28,
               child: CircularProgressIndicator(

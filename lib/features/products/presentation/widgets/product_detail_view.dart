@@ -32,7 +32,7 @@ class ProductDetailView extends ConsumerWidget {
     final async = ref.watch(productDetailProvider(productId));
 
     return async.when(
-      loading: () => _DetailSkeleton(),
+      loading: () => const _DetailSkeleton(),
       error: (error, _) {
         final failure = error is Failure ? error : null;
         if (failure?.type == FailureType.notFound) {
@@ -57,23 +57,23 @@ class ProductDetailView extends ConsumerWidget {
 }
 
 class _DetailSkeleton extends StatelessWidget {
-  _DetailSkeleton();
+  const _DetailSkeleton();
 
   @override
   Widget build(BuildContext context) {
-    return Padding(
-      padding: const EdgeInsets.all(AppSpacing.md),
+    return const Padding(
+      padding: EdgeInsets.all(AppSpacing.md),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
           AspectRatio(aspectRatio: 1.3, child: SkeletonBoxFill()),
-          const SizedBox(height: AppSpacing.md),
+          SizedBox(height: AppSpacing.md),
           SkeletonBox(height: 24, width: 240),
-          const SizedBox(height: AppSpacing.sm),
+          SizedBox(height: AppSpacing.sm),
           SkeletonBox(height: 18, width: 120),
-          const SizedBox(height: AppSpacing.md),
+          SizedBox(height: AppSpacing.md),
           SkeletonBox(height: 14),
-          const SizedBox(height: 6),
+          SizedBox(height: 6),
           SkeletonBox(height: 14),
         ],
       ),
@@ -185,7 +185,7 @@ class _ImageCarouselState extends State<_ImageCarousel> {
             child: ColoredBox(
               color: AppColors.productBackdrop,
               child: images.isEmpty
-                  ? AppNetworkImage(url: null)
+                  ? const AppNetworkImage(url: null)
                   : PageView.builder(
                       controller: _controller,
                       itemCount: images.length,
@@ -217,7 +217,7 @@ class _ImageCarouselState extends State<_ImageCarousel> {
               children: [
                 for (var i = 0; i < images.length; i++)
                   AnimatedContainer(
-                    duration: Duration(milliseconds: 200),
+                    duration: const Duration(milliseconds: 200),
                     margin: const EdgeInsets.symmetric(horizontal: 3),
                     width: i == _index ? 20 : 8,
                     height: 8,
@@ -321,7 +321,7 @@ class _InfoColumn extends ConsumerWidget {
         Row(
           children: [
             Text(context.tr('Quantity'), style: theme.textTheme.titleSmall),
-            Spacer(),
+            const Spacer(),
             QuantitySelector(
               value: safeQuantity,
               max: maxQuantity,

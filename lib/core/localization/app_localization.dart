@@ -157,10 +157,11 @@ class LanguageButton extends ConsumerWidget {
           try {
             await ref.read(localeProvider.notifier).setLanguage(code);
           } catch (_) {
-            if (context.mounted)
+            if (context.mounted) {
               ScaffoldMessenger.of(context).showSnackBar(const SnackBar(
                   content:
                       Text('Could not save language / भाषा सहेज नहीं सके')));
+            }
           }
         },
       );
