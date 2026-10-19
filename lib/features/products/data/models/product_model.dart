@@ -46,10 +46,9 @@ class ProductModel extends Product {
         stock: (json['stock'] as num?)?.toInt() ?? 0,
         brand: json['brand'] as String?,
         thumbnail: json['thumbnail'] as String? ?? '',
-        images: (json['images'] as List<dynamic>?)
-                ?.whereType<String>()
-                .toList() ??
-            const [],
+        images:
+            (json['images'] as List<dynamic>?)?.whereType<String>().toList() ??
+                const [],
         reviews: (json['reviews'] as List<dynamic>?)
                 ?.map((e) => ReviewModel.fromJson(e as Map<String, dynamic>))
                 .toList() ??
@@ -97,3 +96,27 @@ class CategoryModel extends Category {
       .map((w) => '${w[0].toUpperCase()}${w.substring(1)}')
       .join(' ');
 }
+
+/// Shared representation for the offline catalogue and local favourites.
+Map<String, dynamic> productToJson(Product product) => {
+      'id': product.id,
+      'title': product.title,
+      'description': product.description,
+      'category': product.category,
+      'price': product.price,
+      'discountPercentage': product.discountPercentage,
+      'rating': product.rating,
+      'stock': product.stock,
+      'brand': product.brand,
+      'thumbnail': product.thumbnail,
+      'images': product.images,
+      'reviews': [
+        for (final review in product.reviews)
+          {
+            'rating': review.rating,
+            'comment': review.comment,
+            'reviewerName': review.reviewerName,
+            'date': review.date,
+          }
+      ],
+    };

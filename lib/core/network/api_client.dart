@@ -71,50 +71,52 @@ class AuthInterceptor extends Interceptor {
     RequestOptions options,
     RequestInterceptorHandler handler,
   ) async {
-    if (!_isAuthEndpoint(options.path)) {
-      final token = await tokens.readAccessToken();
-      if (token != null) options.headers['Authorization'] = 'Bearer $token';
+    try {
+      if (!_isAuthEndpoint(options.path)) {
+        final token = await tokens.readAccessToken();
+        if (token != null) options.headers['Authorization'] = 'Bearer $token';
+      }
+      handler.next(options);
+    } catch (error) {
+      handler.reject(DioException(requestOptions: options, error: error));
     }
-    handler.next(options);
   }
 
   @override
   Future<void> onError(
-    DioException err,
-    ErrorInterceptorHandler handler,
-  ) async {
+      DioException err, ErrorInterceptorHandler handler) async {
     final request = err.requestOptions;
-    final canRefresh = err.response?.statusCode == 401 &&
-        !_isAuthEndpoint(request.path) &&
-        request.extra[_retriedKey] != true &&
-        request.headers.containsKey('Authorization');
-    if (!canRefresh) {
+    if (err.response?.statusCode != 401 || _isAuthEndpoint(request.path)) {
       handler.next(err);
       return;
     }
-
-    // If another request already refreshed, reuse the newer token.
-    final stored = await tokens.readAccessToken();
-    final sent = request.headers['Authorization'];
-    String? token;
-    if (stored != null && sent != 'Bearer $stored') {
-      token = stored;
-    } else {
-      _refreshing ??= _refresh().whenComplete(() => _refreshing = null);
-      token = await _refreshing;
-    }
-
-    if (token == null) {
-      handler.next(err);
-      return;
-    }
-
-    request.extra[_retriedKey] = true;
-    request.headers['Authorization'] = 'Bearer $token';
     try {
+      if (request.extra[_retriedKey] == true) {
+        await _expire();
+        handler.next(err);
+        return;
+      }
+      final stored = await tokens.readAccessToken();
+      final sent = request.headers['Authorization'];
+      String? token;
+      if (stored != null && sent != 'Bearer $stored') {
+        token = stored;
+      } else {
+        _refreshing ??= _refresh().whenComplete(() => _refreshing = null);
+        token = await _refreshing;
+      }
+      if (token == null) {
+        handler.next(err);
+        return;
+      }
+      request.extra[_retriedKey] = true;
+      request.headers['Authorization'] = 'Bearer $token';
       handler.resolve(await dio.fetch<dynamic>(request));
-    } on DioException catch (e) {
-      handler.next(e);
+    } on DioException catch (error) {
+      // Preserve connection failures: they do not prove the session expired.
+      handler.next(error);
+    } catch (error) {
+      handler.next(DioException(requestOptions: request, error: error));
     }
   }
 
@@ -138,19 +140,27 @@ class AuthInterceptor extends Interceptor {
         await _expire();
         return null;
       }
+      // Do not resurrect a session that was logged out during refresh.
+      if (await tokens.readRefreshToken() != refreshToken) return null;
       await tokens.save(accessToken: access, refreshToken: refresh);
       return access;
     } on DioException catch (e) {
       final status = e.response?.statusCode;
       // A rejected refresh token is terminal. Network trouble is not.
-      if (status == 400 || status == 401 || status == 403) await _expire();
-      return null;
+      if (status == 400 || status == 401 || status == 403) {
+        await _expire();
+        return null;
+      }
+      rethrow;
     }
   }
 
   Future<void> _expire() async {
-    await tokens.clear();
-    onSessionExpired();
+    try {
+      await tokens.clear();
+    } finally {
+      onSessionExpired();
+    }
   }
 }
 

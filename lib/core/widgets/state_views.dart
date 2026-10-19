@@ -1,3 +1,4 @@
+import 'package:shopsphere/core/localization/app_localization.dart';
 import 'package:flutter/material.dart';
 
 import '../theme/app_theme.dart';
@@ -96,14 +97,14 @@ class _StateLayout extends StatelessWidget {
               ),
               const SizedBox(height: AppSpacing.md),
               Text(
-                title,
+                context.tr(title),
                 textAlign: TextAlign.center,
                 style: theme.textTheme.titleLarge,
               ),
               if (message != null) ...[
                 const SizedBox(height: AppSpacing.sm),
                 Text(
-                  message!,
+                  context.tr(message!),
                   textAlign: TextAlign.center,
                   style: theme.textTheme.bodyMedium?.copyWith(
                     color: theme.colorScheme.onSurfaceVariant,
@@ -112,7 +113,8 @@ class _StateLayout extends StatelessWidget {
               ],
               if (actionLabel != null && onAction != null) ...[
                 const SizedBox(height: AppSpacing.lg),
-                FilledButton(onPressed: onAction, child: Text(actionLabel!)),
+                FilledButton(
+                    onPressed: onAction, child: Text(context.tr(actionLabel!))),
               ],
             ],
           ),

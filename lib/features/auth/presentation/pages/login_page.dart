@@ -1,3 +1,4 @@
+import 'package:shopsphere/core/localization/app_localization.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
@@ -35,15 +36,17 @@ class _LoginPageState extends ConsumerState<LoginPage> {
 
   String? _validateUsername(String? value) {
     final text = value?.trim() ?? '';
-    if (text.isEmpty) return 'Enter your username';
-    if (text.length < 3) return 'Username must be at least 3 characters';
+    if (text.isEmpty) return context.tr('Enter your username');
+    if (text.length < 3)
+      return context.tr('Username must be at least 3 characters');
     return null;
   }
 
   String? _validatePassword(String? value) {
     final text = value ?? '';
-    if (text.isEmpty) return 'Enter your password';
-    if (text.length < 6) return 'Password must be at least 6 characters';
+    if (text.isEmpty) return context.tr('Enter your password');
+    if (text.length < 6)
+      return context.tr('Password must be at least 6 characters');
     return null;
   }
 
@@ -53,7 +56,8 @@ class _LoginPageState extends ConsumerState<LoginPage> {
     final theme = Theme.of(context);
 
     return Scaffold(
-      appBar: AppBar(actions: const [ThemeToggle(), SizedBox(width: 16)]),
+      appBar: AppBar(
+          actions: const [LanguageButton(), ThemeToggle(), SizedBox(width: 16)]),
       body: SafeArea(
         child: Center(
           child: SingleChildScrollView(
@@ -88,10 +92,12 @@ class _LoginPageState extends ConsumerState<LoginPage> {
                       ],
                     ),
                     const SizedBox(height: AppSpacing.xl),
-                    Text('Welcome back', style: theme.textTheme.headlineMedium),
+                    Text(context.tr('Welcome back'),
+                        style: theme.textTheme.headlineMedium),
                     const SizedBox(height: AppSpacing.xs),
                     Text(
-                      'Log in to browse products and manage your cart.',
+                      context.tr(
+                          'Log in to browse products and manage your cart.'),
                       style: theme.textTheme.bodyMedium?.copyWith(
                         color: theme.colorScheme.onSurfaceVariant,
                       ),
@@ -105,11 +111,11 @@ class _LoginPageState extends ConsumerState<LoginPage> {
                       controller: _username,
                       enabled: !auth.isSubmitting,
                       textInputAction: TextInputAction.next,
-                      autofillHints: const [AutofillHints.username],
+                      autofillHints: [AutofillHints.username],
                       validator: _validateUsername,
                       decoration: appInputDecoration(
                         context,
-                        label: 'Username',
+                        label: context.tr('Username'),
                         icon: Icons.person_outline,
                       ),
                     ),
@@ -119,15 +125,16 @@ class _LoginPageState extends ConsumerState<LoginPage> {
                       enabled: !auth.isSubmitting,
                       obscureText: _obscure,
                       textInputAction: TextInputAction.done,
-                      autofillHints: const [AutofillHints.password],
+                      autofillHints: [AutofillHints.password],
                       validator: _validatePassword,
                       onFieldSubmitted: (_) => _submit(),
                       decoration: appInputDecoration(
                         context,
-                        label: 'Password',
+                        label: context.tr('Password'),
                         icon: Icons.lock_outline,
                         suffix: IconButton(
-                          tooltip: _obscure ? 'Show password' : 'Hide password',
+                          tooltip: context
+                              .tr(_obscure ? 'Show password' : 'Hide password'),
                           icon: Icon(
                             _obscure
                                 ? Icons.visibility_outlined
@@ -141,13 +148,13 @@ class _LoginPageState extends ConsumerState<LoginPage> {
                     FilledButton(
                       onPressed: auth.isSubmitting ? null : _submit,
                       child: auth.isSubmitting
-                          ? const SizedBox(
+                          ? SizedBox(
                               width: 22,
                               height: 22,
                               child:
                                   CircularProgressIndicator(strokeWidth: 2.5),
                             )
-                          : const Text('Log in'),
+                          : Text(context.tr('Log in')),
                     ),
                     const SizedBox(height: AppSpacing.md),
                     Text(

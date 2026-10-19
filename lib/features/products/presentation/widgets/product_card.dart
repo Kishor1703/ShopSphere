@@ -6,6 +6,7 @@ import '../../../../core/widgets/app_network_image.dart';
 import '../../../../core/widgets/rating_badge.dart';
 import '../../../../core/widgets/skeleton.dart';
 import '../../domain/entities/product.dart';
+import 'wishlist_button.dart';
 
 class ProductCard extends StatelessWidget {
   const ProductCard({
@@ -62,6 +63,10 @@ class ProductCard extends StatelessWidget {
                         ),
                       ),
                     ),
+                    Positioned(
+                        top: 4,
+                        right: 4,
+                        child: WishlistButton(product: product)),
                     if (product.hasDiscount)
                       Positioned(
                         top: AppSpacing.sm,

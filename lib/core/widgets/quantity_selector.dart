@@ -1,3 +1,4 @@
+import 'package:shopsphere/core/localization/app_localization.dart';
 import 'package:flutter/material.dart';
 
 /// Stepper that never lets the value leave `[min, max]`.
@@ -21,15 +22,15 @@ class QuantitySelector extends StatelessWidget {
       mainAxisSize: MainAxisSize.min,
       children: [
         IconButton.outlined(
-          tooltip: 'Decrease quantity',
-          constraints: const BoxConstraints(minWidth: 48, minHeight: 48),
+          tooltip: context.tr('Decrease quantity'),
+          constraints: BoxConstraints(minWidth: 48, minHeight: 48),
           onPressed: value > min ? () => onChanged(value - 1) : null,
           icon: const Icon(Icons.remove),
         ),
         ConstrainedBox(
           constraints: const BoxConstraints(minWidth: 40),
           child: Semantics(
-            label: 'Quantity',
+            label: context.tr('Quantity'),
             child: Text(
               '$value',
               textAlign: TextAlign.center,
@@ -38,8 +39,8 @@ class QuantitySelector extends StatelessWidget {
           ),
         ),
         IconButton.outlined(
-          tooltip: 'Increase quantity',
-          constraints: const BoxConstraints(minWidth: 48, minHeight: 48),
+          tooltip: context.tr('Increase quantity'),
+          constraints: BoxConstraints(minWidth: 48, minHeight: 48),
           onPressed: value < max ? () => onChanged(value + 1) : null,
           icon: const Icon(Icons.add),
         ),

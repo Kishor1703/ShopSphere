@@ -20,6 +20,7 @@ final authRepositoryProvider = Provider<AuthRepository>(
   (ref) => AuthRepositoryImpl(
     remote: ref.watch(authRemoteDataSourceProvider),
     tokens: ref.watch(tokenStorageProvider),
+    preferences: ref.watch(sharedPreferencesProvider),
   ),
 );
 
@@ -47,7 +48,8 @@ class AuthState extends Equatable {
   final bool isSubmitting;
   final String? message;
 
-  AuthState copyWith({bool? isSubmitting, String? message, bool clearMessage = false}) =>
+  AuthState copyWith(
+          {bool? isSubmitting, String? message, bool clearMessage = false}) =>
       AuthState(
         status: status,
         user: user,
@@ -64,8 +66,10 @@ const sessionExpiredMessage = 'Your session expired. Please log in again.';
 class AuthNotifier extends Notifier<AuthState> {
   @override
   AuthState build() {
-    final subscription =
-        ref.read(sessionEventsProvider).onExpired.listen((_) => _handleExpired());
+    final subscription = ref
+        .read(sessionEventsProvider)
+        .onExpired
+        .listen((_) => _handleExpired());
     ref.onDispose(subscription.cancel);
     Future<void>.microtask(restoreSession);
     return const AuthState();
@@ -74,10 +78,12 @@ class AuthNotifier extends Notifier<AuthState> {
   Future<void> restoreSession() async {
     state = const AuthState();
     try {
-      final user = await ref.read(restoreSessionUseCaseProvider)()
+      final user = await ref
+          .read(restoreSessionUseCaseProvider)()
           .timeout(const Duration(seconds: 30));
       state = user == null
-          ? AuthState(status: AuthStatus.unauthenticated, message: state.message)
+          ? AuthState(
+              status: AuthStatus.unauthenticated, message: state.message)
           : AuthState(status: AuthStatus.authenticated, user: user);
     } catch (error) {
       final failure = mapError(error);
@@ -110,7 +116,8 @@ class AuthNotifier extends Notifier<AuthState> {
   }
 }
 
-final authProvider = NotifierProvider<AuthNotifier, AuthState>(AuthNotifier.new);
+final authProvider =
+    NotifierProvider<AuthNotifier, AuthState>(AuthNotifier.new);
 
 /// The signed-in user's id, or null. Cart and checkout depend on this.
 final currentUserIdProvider = Provider<int?>(

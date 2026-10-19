@@ -72,17 +72,19 @@ class ProductPage extends Equatable {
     required this.products,
     required this.total,
     required this.skip,
+    this.isOffline = false,
   });
 
   final List<Product> products;
   final int total;
   final int skip;
+  final bool isOffline;
 
   /// True while the server still has items beyond this page.
   bool get hasMore => products.isNotEmpty && skip + products.length < total;
 
   @override
-  List<Object?> get props => [products, total, skip];
+  List<Object?> get props => [products, total, skip, isOffline];
 }
 
 class Category extends Equatable {

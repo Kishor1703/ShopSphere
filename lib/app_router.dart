@@ -8,6 +8,7 @@ import 'features/auth/presentation/providers/auth_providers.dart';
 import 'features/cart/presentation/pages/cart_page.dart';
 import 'features/cart/presentation/pages/order_success_page.dart';
 import 'features/products/presentation/pages/home_page.dart';
+import 'features/products/presentation/pages/wishlist_page.dart';
 import 'features/products/presentation/pages/product_detail_page.dart';
 import 'features/profile/presentation/pages/profile_page.dart';
 import 'shell/app_shell.dart';
@@ -38,6 +39,7 @@ final routerProvider = Provider<GoRouter>((ref) {
       }
     },
     routes: [
+      GoRoute(path: '/wishlist', builder: (_, __) => const WishlistPage()),
       GoRoute(path: '/splash', builder: (_, __) => const SplashPage()),
       GoRoute(path: '/login', builder: (_, __) => const LoginPage()),
       GoRoute(
@@ -54,14 +56,19 @@ final routerProvider = Provider<GoRouter>((ref) {
         builder: (_, __, shell) => AppShell(navigationShell: shell),
         branches: [
           StatefulShellBranch(
-            routes: [GoRoute(path: '/home', builder: (_, __) => const HomePage())],
-          ),
-          StatefulShellBranch(
-            routes: [GoRoute(path: '/cart', builder: (_, __) => const CartPage())],
+            routes: [
+              GoRoute(path: '/home', builder: (_, __) => const HomePage())
+            ],
           ),
           StatefulShellBranch(
             routes: [
-              GoRoute(path: '/profile', builder: (_, __) => const ProfilePage()),
+              GoRoute(path: '/cart', builder: (_, __) => const CartPage())
+            ],
+          ),
+          StatefulShellBranch(
+            routes: [
+              GoRoute(
+                  path: '/profile', builder: (_, __) => const ProfilePage()),
             ],
           ),
         ],

@@ -16,5 +16,6 @@ ScreenSize screenSizeForWidth(double width) {
 }
 
 extension ScreenSizeContext on BuildContext {
-  ScreenSize get screenSize => screenSizeForWidth(MediaQuery.sizeOf(this).width);
+  ScreenSize get screenSize =>
+      screenSizeForWidth(MediaQuery.sizeOf(this).width);
 }

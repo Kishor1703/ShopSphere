@@ -4,7 +4,8 @@ import 'package:flutter_secure_storage/flutter_secure_storage.dart';
 abstract class TokenStorage {
   Future<String?> readAccessToken();
   Future<String?> readRefreshToken();
-  Future<void> save({required String accessToken, required String refreshToken});
+  Future<void> save(
+      {required String accessToken, required String refreshToken});
   Future<void> clear();
 }
 

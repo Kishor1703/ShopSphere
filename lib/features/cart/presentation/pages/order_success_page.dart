@@ -1,3 +1,4 @@
+import 'package:shopsphere/core/localization/app_localization.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
@@ -26,14 +27,14 @@ class OrderSuccessPage extends ConsumerWidget {
                 children: [
                   TweenAnimationBuilder<double>(
                     tween: Tween(begin: 0.6, end: 1),
-                    duration: const Duration(milliseconds: 450),
+                    duration: Duration(milliseconds: 450),
                     curve: Curves.easeOutBack,
                     builder: (context, scale, child) =>
                         Transform.scale(scale: scale, child: child),
                     child: Container(
                       width: 96,
                       height: 96,
-                      decoration: const BoxDecoration(
+                      decoration: BoxDecoration(
                         color: AppColors.success,
                         shape: BoxShape.circle,
                       ),
@@ -46,7 +47,7 @@ class OrderSuccessPage extends ConsumerWidget {
                   ),
                   const SizedBox(height: AppSpacing.lg),
                   Text(
-                    'Order placed',
+                    context.tr('Order placed'),
                     style: theme.textTheme.headlineMedium,
                     textAlign: TextAlign.center,
                   ),
@@ -62,7 +63,8 @@ class OrderSuccessPage extends ConsumerWidget {
                   ),
                   const SizedBox(height: AppSpacing.xs),
                   Text(
-                    'This is a simulated order, so nothing is saved on the server.',
+                    context.tr(
+                        'This is a simulated order, so nothing is saved on the server.'),
                     textAlign: TextAlign.center,
                     style: theme.textTheme.bodySmall?.copyWith(
                       color: theme.colorScheme.onSurfaceVariant,
@@ -71,7 +73,7 @@ class OrderSuccessPage extends ConsumerWidget {
                   const SizedBox(height: AppSpacing.xl),
                   FilledButton(
                     onPressed: () => context.go('/home'),
-                    child: const Text('Continue shopping'),
+                    child: Text(context.tr('Continue shopping')),
                   ),
                 ],
               ),

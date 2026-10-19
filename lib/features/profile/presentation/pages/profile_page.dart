@@ -1,5 +1,7 @@
+import 'package:shopsphere/core/localization/app_localization.dart';
 import 'package:cached_network_image/cached_network_image.dart';
 import 'package:flutter/material.dart';
+import 'package:go_router/go_router.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import '../../../../core/error/failure.dart';
@@ -18,12 +20,12 @@ class ProfilePage extends ConsumerWidget {
 
     return Scaffold(
       appBar: AppBar(
-        title: const Text('Your profile'),
-        actions: const [ThemeToggle(), SizedBox(width: 16)],
+        title: Text(context.tr('Your profile')),
+        actions: const [LanguageButton(), ThemeToggle(), SizedBox(width: 16)],
       ),
       body: SafeArea(
         child: profile.when(
-          loading: () => const Center(child: CircularProgressIndicator()),
+          loading: () => Center(child: CircularProgressIndicator()),
           error: (error, _) => ErrorView(
             message: error is Failure
                 ? error.message
@@ -43,16 +45,17 @@ class ProfilePage extends ConsumerWidget {
     final confirmed = await showDialog<bool>(
       context: context,
       builder: (context) => AlertDialog(
-        title: const Text('Log out?'),
-        content: const Text('You will need to log in again to keep shopping.'),
+        title: Text(context.tr('Log out?')),
+        content:
+            Text(context.tr('You will need to log in again to keep shopping.')),
         actions: [
           TextButton(
             onPressed: () => Navigator.of(context).pop(false),
-            child: const Text('Cancel'),
+            child: Text(context.tr('Cancel')),
           ),
           FilledButton(
             onPressed: () => Navigator.of(context).pop(true),
-            child: const Text('Log out'),
+            child: Text(context.tr('Log out')),
           ),
         ],
       ),
@@ -115,29 +118,35 @@ class _ProfileContent extends StatelessWidget {
               const SizedBox(height: AppSpacing.lg),
               _InfoRow(
                 icon: Icons.person_outline,
-                label: 'First name',
+                label: context.tr('First name'),
                 value: user.firstName,
               ),
               _InfoRow(
                 icon: Icons.badge_outlined,
-                label: 'Last name',
+                label: context.tr('Last name'),
                 value: user.lastName,
               ),
               _InfoRow(
                 icon: Icons.mail_outline,
-                label: 'Email',
+                label: context.tr('Email'),
                 value: user.email,
               ),
               _InfoRow(
                 icon: Icons.phone_outlined,
-                label: 'Phone',
+                label: context.tr('Phone'),
                 value: user.phone,
               ),
               const SizedBox(height: AppSpacing.lg),
               OutlinedButton.icon(
+                onPressed: () => context.push('/wishlist'),
+                icon: const Icon(Icons.favorite_border),
+                label: Text(context.tr('Wishlist')),
+              ),
+              const SizedBox(height: 12),
+              OutlinedButton.icon(
                 onPressed: onLogout,
                 icon: const Icon(Icons.logout),
-                label: const Text('Log out'),
+                label: Text(context.tr('Log out')),
               ),
             ],
           ),

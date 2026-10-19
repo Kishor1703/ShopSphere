@@ -1,3 +1,4 @@
+import 'package:shopsphere/core/localization/app_localization.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
@@ -26,14 +27,15 @@ class HomePage extends ConsumerWidget {
     return Row(
       children: [
         Expanded(flex: 11, child: catalogue),
-        const VerticalDivider(width: 1),
+        VerticalDivider(width: 1),
         Expanded(
           flex: 9,
           child: selected == null
-              ? const EmptyView(
+              ? EmptyView(
                   icon: Icons.touch_app_outlined,
-                  title: 'Select a product',
-                  message: 'Pick something from the list to see its details.',
+                  title: context.tr('Select a product'),
+                  message: context
+                      .tr('Pick something from the list to see its details.'),
                 )
               : ProductDetailView(
                   key: ValueKey(selected),
@@ -134,7 +136,7 @@ class _CatalogueState extends ConsumerState<_Catalogue> {
           onRefresh: notifier.refresh,
           child: CustomScrollView(
             controller: _scrollController,
-            physics: const AlwaysScrollableScrollPhysics(),
+            physics: AlwaysScrollableScrollPhysics(),
             keyboardDismissBehavior: ScrollViewKeyboardDismissBehavior.onDrag,
             slivers: [
               SliverToBoxAdapter(
@@ -155,7 +157,7 @@ class _CatalogueState extends ConsumerState<_Catalogue> {
                   onSelected: notifier.selectCategory,
                 ),
               ),
-              const SliverToBoxAdapter(child: SizedBox(height: AppSpacing.sm)),
+              SliverToBoxAdapter(child: const SizedBox(height: AppSpacing.sm)),
               if (state.failure != null &&
                   state.products.isNotEmpty &&
                   !state.loadMoreFailed)
@@ -165,10 +167,22 @@ class _CatalogueState extends ConsumerState<_Catalogue> {
                     actions: [
                       TextButton(
                           onPressed: notifier.refresh,
-                          child: const Text('Retry refresh'))
+                          child: Text(context.tr('Retry refresh')))
                     ],
                   ),
                 ),
+              if (state.isOffline)
+                SliverToBoxAdapter(
+                    child: MaterialBanner(
+                  leading: const Icon(Icons.cloud_off_outlined),
+                  content: Text(
+                      context.tr('You are offline. Showing saved products.')),
+                  actions: [
+                    TextButton(
+                        onPressed: notifier.refresh,
+                        child: Text(context.tr('Retry')))
+                  ],
+                )),
               _body(state, notifier),
             ],
           ),
@@ -183,7 +197,7 @@ class _CatalogueState extends ConsumerState<_Catalogue> {
       case ListStatus.loading:
         return _grid(
           itemCount: 8,
-          itemBuilder: (context, index) => const ProductCardSkeleton(),
+          itemBuilder: (context, index) => ProductCardSkeleton(),
         );
       case ListStatus.failure:
         return SliverFillRemaining(
@@ -198,7 +212,7 @@ class _CatalogueState extends ConsumerState<_Catalogue> {
           hasScrollBody: false,
           child: EmptyView(
             icon: Icons.search_off_rounded,
-            title: 'No products found',
+            title: context.tr('No products found'),
             message: state.hasActiveFilters
                 ? 'Try a different search or category.'
                 : 'There is nothing to show right now.',
@@ -252,7 +266,7 @@ class _CatalogueState extends ConsumerState<_Catalogue> {
         return SliverMainAxisGroup(
           slivers: [
             SliverPadding(
-              padding: const EdgeInsets.fromLTRB(padding, 0, padding, padding),
+              padding: EdgeInsets.fromLTRB(padding, 0, padding, padding),
               sliver: SliverGrid(
                 gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
                   crossAxisCount: columns,
@@ -324,15 +338,19 @@ class _Header extends StatelessWidget {
                       ?.copyWith(fontWeight: FontWeight.w700),
                 ),
               ),
-              const ThemeToggle(),
-              const CartBadgeButton(),
+              IconButton(
+                  tooltip: context.tr('Wishlist'),
+                  onPressed: () => context.push('/wishlist'),
+                  icon: const Icon(Icons.favorite_border)),
+              ThemeToggle(),
+              CartBadgeButton(),
             ],
           ),
           const SizedBox(height: AppSpacing.sm),
           Container(
             width: double.infinity,
-            margin: const EdgeInsets.only(
-                right: AppSpacing.sm, bottom: AppSpacing.md),
+            margin:
+                const EdgeInsets.only(right: AppSpacing.sm, bottom: AppSpacing.md),
             padding: const EdgeInsets.all(20),
             decoration: BoxDecoration(
               borderRadius: BorderRadius.circular(24),
@@ -344,14 +362,14 @@ class _Header extends StatelessWidget {
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                Text('A little discovery, every day.',
+                Text(context.tr('A little discovery, every day.'),
                     style: theme.textTheme.titleLarge?.copyWith(
                       color: theme.colorScheme.onPrimaryContainer,
                       fontWeight: FontWeight.w800,
                       letterSpacing: -0.5,
                     )),
                 const SizedBox(height: 6),
-                Text('Find your next everyday favourite.',
+                Text(context.tr('Find your next everyday favourite.'),
                     style: theme.textTheme.bodyMedium?.copyWith(
                       color: theme.colorScheme.onPrimaryContainer,
                     )),
@@ -371,12 +389,12 @@ class _Header extends StatelessWidget {
                       textInputAction: TextInputAction.search,
                       decoration: appInputDecoration(
                         context,
-                        label: 'Search products',
+                        label: context.tr('Search products'),
                         icon: Icons.search,
                         suffix: value.text.isEmpty
                             ? null
                             : IconButton(
-                                tooltip: 'Clear search',
+                                tooltip: context.tr('Clear search'),
                                 icon: const Icon(Icons.close),
                                 onPressed: onClear,
                               ),
@@ -386,7 +404,7 @@ class _Header extends StatelessWidget {
                 ),
                 const SizedBox(width: AppSpacing.xs),
                 PopupMenuButton<ProductSort>(
-                  tooltip: 'Sort products',
+                  tooltip: context.tr('Sort products'),
                   icon: const Icon(Icons.sort_rounded),
                   initialValue: sort,
                   onSelected: onSortSelected,
@@ -395,7 +413,7 @@ class _Header extends StatelessWidget {
                       CheckedPopupMenuItem<ProductSort>(
                         value: option,
                         checked: option == sort,
-                        child: Text(option.label),
+                        child: Text(context.tr(option.label)),
                       ),
                   ],
                 ),
@@ -432,7 +450,7 @@ class _CategoryChips extends ConsumerWidget {
         itemBuilder: (context, index) {
           if (index == 0) {
             return ChoiceChip(
-              label: const Text('All'),
+              label: Text(context.tr('All')),
               selected: selected == null,
               onSelected: (_) => onSelected(null),
             );
@@ -458,8 +476,8 @@ class _Footer extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     if (state.isLoadingMore) {
-      return const Padding(
-        padding: EdgeInsets.all(AppSpacing.md),
+      return Padding(
+        padding: const EdgeInsets.all(AppSpacing.md),
         child: Center(
           child: SizedBox(
             width: 28,
@@ -476,7 +494,7 @@ class _Footer extends StatelessWidget {
           child: OutlinedButton.icon(
             onPressed: onRetry,
             icon: const Icon(Icons.refresh),
-            label: const Text('Could not load more. Retry'),
+            label: Text(context.tr('Could not load more. Retry')),
           ),
         ),
       );
@@ -486,7 +504,7 @@ class _Footer extends StatelessWidget {
         padding: const EdgeInsets.all(AppSpacing.md),
         child: Center(
           child: Text(
-            'You have seen everything',
+            context.tr('You have seen everything'),
             style: Theme.of(context).textTheme.bodySmall?.copyWith(
                   color: Theme.of(context).colorScheme.onSurfaceVariant,
                 ),

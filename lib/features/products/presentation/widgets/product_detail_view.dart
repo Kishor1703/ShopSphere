@@ -1,3 +1,4 @@
+import 'package:shopsphere/core/localization/app_localization.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
@@ -31,15 +32,16 @@ class ProductDetailView extends ConsumerWidget {
     final async = ref.watch(productDetailProvider(productId));
 
     return async.when(
-      loading: () => const _DetailSkeleton(),
+      loading: () => _DetailSkeleton(),
       error: (error, _) {
         final failure = error is Failure ? error : null;
         if (failure?.type == FailureType.notFound) {
           return EmptyView(
             icon: Icons.search_off_rounded,
-            title: 'Product not found',
-            message: 'This product may have been removed or never existed.',
-            actionLabel: 'Back to shop',
+            title: context.tr('Product not found'),
+            message: context
+                .tr('This product may have been removed or never existed.'),
+            actionLabel: context.tr('Back to shop'),
             onAction: () =>
                 context.canPop() ? context.pop() : context.go('/home'),
           );
@@ -55,23 +57,23 @@ class ProductDetailView extends ConsumerWidget {
 }
 
 class _DetailSkeleton extends StatelessWidget {
-  const _DetailSkeleton();
+  _DetailSkeleton();
 
   @override
   Widget build(BuildContext context) {
-    return const Padding(
-      padding: EdgeInsets.all(AppSpacing.md),
+    return Padding(
+      padding: const EdgeInsets.all(AppSpacing.md),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
           AspectRatio(aspectRatio: 1.3, child: SkeletonBoxFill()),
-          SizedBox(height: AppSpacing.md),
+          const SizedBox(height: AppSpacing.md),
           SkeletonBox(height: 24, width: 240),
-          SizedBox(height: AppSpacing.sm),
+          const SizedBox(height: AppSpacing.sm),
           SkeletonBox(height: 18, width: 120),
-          SizedBox(height: AppSpacing.md),
+          const SizedBox(height: AppSpacing.md),
           SkeletonBox(height: 14),
-          SizedBox(height: 6),
+          const SizedBox(height: 6),
           SkeletonBox(height: 14),
         ],
       ),
@@ -104,7 +106,7 @@ class _DetailContentState extends ConsumerState<_DetailContent> {
     };
     ScaffoldMessenger.of(context)
       ..hideCurrentSnackBar()
-      ..showSnackBar(SnackBar(content: Text(message)));
+      ..showSnackBar(SnackBar(content: Text(context.tr(message))));
   }
 
   @override
@@ -166,7 +168,7 @@ class _ImageCarouselState extends State<_ImageCarousel> {
     final p = widget.product;
     if (p.images.isNotEmpty) return p.images;
     if (p.thumbnail.isNotEmpty) return [p.thumbnail];
-    return const [];
+    return [];
   }
 
   @override
@@ -183,7 +185,7 @@ class _ImageCarouselState extends State<_ImageCarousel> {
             child: ColoredBox(
               color: AppColors.productBackdrop,
               child: images.isEmpty
-                  ? const AppNetworkImage(url: null)
+                  ? AppNetworkImage(url: null)
                   : PageView.builder(
                       controller: _controller,
                       itemCount: images.length,
@@ -215,7 +217,7 @@ class _ImageCarouselState extends State<_ImageCarousel> {
               children: [
                 for (var i = 0; i < images.length; i++)
                   AnimatedContainer(
-                    duration: const Duration(milliseconds: 200),
+                    duration: Duration(milliseconds: 200),
                     margin: const EdgeInsets.symmetric(horizontal: 3),
                     width: i == _index ? 20 : 8,
                     height: 8,
@@ -318,8 +320,8 @@ class _InfoColumn extends ConsumerWidget {
         const SizedBox(height: AppSpacing.lg),
         Row(
           children: [
-            Text('Quantity', style: theme.textTheme.titleSmall),
-            const Spacer(),
+            Text(context.tr('Quantity'), style: theme.textTheme.titleSmall),
+            Spacer(),
             QuantitySelector(
               value: safeQuantity,
               max: maxQuantity,
@@ -331,14 +333,16 @@ class _InfoColumn extends ConsumerWidget {
         FilledButton.icon(
           onPressed: product.inStock ? onAddToCart : null,
           icon: const Icon(Icons.add_shopping_cart_rounded),
-          label: Text(product.inStock ? 'Add to cart' : 'Out of stock'),
+          label: Text(
+              context.tr(product.inStock ? 'Add to cart' : 'Out of stock')),
         ),
         const SizedBox(height: AppSpacing.lg),
-        Text('Customer reviews', style: theme.textTheme.titleMedium),
+        Text(context.tr('Customer reviews'),
+            style: theme.textTheme.titleMedium),
         const SizedBox(height: AppSpacing.sm),
         if (product.reviews.isEmpty)
           Text(
-            'No reviews yet.',
+            context.tr('No reviews yet.'),
             style: theme.textTheme.bodyMedium
                 ?.copyWith(color: scheme.onSurfaceVariant),
           )

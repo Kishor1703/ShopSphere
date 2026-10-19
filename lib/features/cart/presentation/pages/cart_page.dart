@@ -1,3 +1,4 @@
+import 'package:shopsphere/core/localization/app_localization.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
@@ -27,7 +28,7 @@ class CartPage extends ConsumerWidget {
           SnackBar(
             content: Text('$message Your cart is unchanged.'),
             action: SnackBarAction(
-              label: 'Retry',
+              label: context.tr('Retry'),
               onPressed: () => _placeOrder(context, ref),
             ),
           ),
@@ -47,7 +48,7 @@ class CartPage extends ConsumerWidget {
         child: items.isEmpty
             ? EmptyView(
                 icon: Icons.shopping_cart_outlined,
-                title: 'Your cart is empty',
+                title: context.tr('Your cart is empty'),
                 message: 'Add something you like and it will show up here.',
                 actionLabel: 'Browse products',
                 onAction: () => context.go('/home'),
@@ -149,7 +150,7 @@ class _SummaryPanel extends StatelessWidget {
         child: Row(
           mainAxisAlignment: MainAxisAlignment.spaceBetween,
           children: [
-            Text(label, style: style),
+            Text(context.tr(label), style: style),
             Text(value, style: style),
           ],
         ),
@@ -177,18 +178,18 @@ class _SummaryPanel extends StatelessWidget {
                 ? const Color(0xFF81DCA9)
                 : AppColors.success,
           ),
-          const Divider(),
+          Divider(),
           row('Total', formatPrice(summary.total), strong: true),
           const SizedBox(height: AppSpacing.md),
           FilledButton(
             onPressed: submitting ? null : onPlaceOrder,
             child: submitting
-                ? const SizedBox(
+                ? SizedBox(
                     width: 22,
                     height: 22,
                     child: CircularProgressIndicator(strokeWidth: 2.5),
                   )
-                : const Text('Place order'),
+                : Text(context.tr('Place order')),
           ),
         ],
       ),

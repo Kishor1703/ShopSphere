@@ -6,6 +6,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../../../../core/di/providers.dart';
 import '../../../../core/error/failure.dart';
 import '../../data/datasources/product_remote_datasource.dart';
+import '../../data/datasources/product_cache.dart';
 import '../../data/repositories/product_repository_impl.dart';
 import '../../domain/entities/product.dart';
 import '../../domain/repositories/product_repository.dart';
@@ -16,7 +17,8 @@ final productRemoteDataSourceProvider = Provider<ProductRemoteDataSource>(
 );
 
 final productRepositoryProvider = Provider<ProductRepository>(
-  (ref) => ProductRepositoryImpl(ref.watch(productRemoteDataSourceProvider)),
+  (ref) => ProductRepositoryImpl(ref.watch(productRemoteDataSourceProvider),
+      cache: ProductCache(ref.watch(sharedPreferencesProvider))),
 );
 
 final getProductsPageUseCaseProvider = Provider(
@@ -53,6 +55,7 @@ class ProductListState extends Equatable {
     this.hasMore = true,
     this.isLoadingMore = false,
     this.isRefreshing = false,
+    this.isOffline = false,
     this.loadMoreFailed = false,
     this.failure,
   });
@@ -65,6 +68,7 @@ class ProductListState extends Equatable {
   final bool hasMore;
   final bool isLoadingMore;
   final bool isRefreshing;
+  final bool isOffline;
   final bool loadMoreFailed;
   final Failure? failure;
 
@@ -80,6 +84,7 @@ class ProductListState extends Equatable {
     bool? hasMore,
     bool? isLoadingMore,
     bool? isRefreshing,
+    bool? isOffline,
     bool? loadMoreFailed,
     Failure? failure,
     bool clearFailure = false,
@@ -94,6 +99,7 @@ class ProductListState extends Equatable {
         hasMore: hasMore ?? this.hasMore,
         isLoadingMore: isLoadingMore ?? this.isLoadingMore,
         isRefreshing: isRefreshing ?? this.isRefreshing,
+        isOffline: isOffline ?? this.isOffline,
         loadMoreFailed: loadMoreFailed ?? this.loadMoreFailed,
         failure: clearFailure ? null : (failure ?? this.failure),
       );
@@ -108,6 +114,7 @@ class ProductListState extends Equatable {
         hasMore,
         isLoadingMore,
         isRefreshing,
+        isOffline,
         loadMoreFailed,
         failure,
       ];
@@ -217,6 +224,7 @@ class ProductListNotifier extends Notifier<ProductListState> {
       final fresh = page.products.where((p) => seen.add(p.id)).toList();
       state = state.copyWith(
         products: [...state.products, ...fresh],
+        isOffline: state.isOffline || page.isOffline,
         hasMore: page.products.isNotEmpty && _nextSkip < page.total,
         isLoadingMore: false,
       );
@@ -237,6 +245,7 @@ class ProductListNotifier extends Notifier<ProductListState> {
       products: retain ? state.products : const [],
       hasMore: retain ? state.hasMore : true,
       isRefreshing: retain,
+      isOffline: retain && state.isOffline,
       isLoadingMore: false,
       loadMoreFailed: false,
       clearFailure: true,
@@ -252,12 +261,17 @@ class ProductListNotifier extends Notifier<ProductListState> {
         status: products.isEmpty ? ListStatus.empty : ListStatus.success,
         products: products,
         isRefreshing: false,
+        isOffline: page.isOffline,
         hasMore: page.products.isNotEmpty && _nextSkip < page.total,
       );
     } on Failure catch (failure) {
       if (requestId != _requestId) return;
       state = state.copyWith(
         status: retain ? ListStatus.success : ListStatus.failure,
+        isOffline: retain &&
+            (state.isOffline ||
+                failure.type == FailureType.network ||
+                failure.type == FailureType.timeout),
         isRefreshing: false,
         failure: failure,
       );

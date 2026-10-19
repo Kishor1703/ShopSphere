@@ -1,3 +1,4 @@
+import 'package:shopsphere/core/localization/app_localization.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
@@ -29,17 +30,17 @@ class AppShell extends ConsumerWidget {
 
     final destinations = <({String label, Widget icon, Widget selectedIcon})>[
       (
-        label: 'Shop',
+        label: context.tr('Shop'),
         icon: const Icon(Icons.storefront_outlined),
         selectedIcon: const Icon(Icons.storefront),
       ),
       (
-        label: 'Cart',
+        label: context.tr('Cart'),
         icon: cartIcon(Icons.shopping_cart_outlined),
         selectedIcon: cartIcon(Icons.shopping_cart),
       ),
       (
-        label: 'Profile',
+        label: context.tr('Profile'),
         icon: const Icon(Icons.person_outline),
         selectedIcon: const Icon(Icons.person),
       ),
@@ -77,12 +78,12 @@ class AppShell extends ConsumerWidget {
                   NavigationRailDestination(
                     icon: d.icon,
                     selectedIcon: d.selectedIcon,
-                    label: Text(d.label),
+                    label: Text(context.tr(d.label)),
                   ),
               ],
             ),
           ),
-          const VerticalDivider(width: 1),
+          VerticalDivider(width: 1),
           Expanded(child: navigationShell),
         ],
       ),

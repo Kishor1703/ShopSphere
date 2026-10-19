@@ -1,3 +1,4 @@
+import 'package:shopsphere/core/localization/app_localization.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
@@ -16,7 +17,7 @@ class SplashPage extends ConsumerWidget {
       return Scaffold(
         body: SafeArea(
           child: ErrorView(
-            title: 'Could not start ShopSphere',
+            title: context.tr('Could not start ShopSphere'),
             message: auth.message ?? 'Please check your connection.',
             onRetry: () => ref.read(authProvider.notifier).restoreSession(),
           ),
@@ -53,7 +54,7 @@ class SplashPage extends ConsumerWidget {
                   ),
             ),
             const SizedBox(height: AppSpacing.lg),
-            const SizedBox(
+            SizedBox(
               width: 28,
               height: 28,
               child: CircularProgressIndicator(
